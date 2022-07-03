@@ -5,6 +5,12 @@ Basic Cluster setup instructions:
 **Create an IAM User**
 1. Create an IAM user with programmatic access and administrator-level privileges and note secret keys.
 
+
+-------------------
+**Create VPC**
+1. Can do it through cloud formation after logging as this IAM user.
+2. Use the CF template :  https://s3.us-west-2.amazonaws.com/amazon-eks/cloudformation/2020-10-29/amazon-eks-vpc-private-subnets.yaml
+ 
 ------------------------
 **Launch an EC2 Instance and other command line tools**
 1. Create an **EC2 instance** in the same region. eg: us-east-1
