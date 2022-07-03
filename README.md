@@ -97,7 +97,7 @@ Basic Cluster setup instcructions:
 6. Then check using the DNS name of the LoadBalancer.
 
 
-**Test the High Availability **
+**Test the High Availability**
 
 1. In the AWS Console, shut/terminate any worker.
 2. Check the status using kubectl.
