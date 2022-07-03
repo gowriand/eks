@@ -40,15 +40,23 @@ Basic Cluster setup instcructions:
 ---------------------
 **Provision an EKS Cluster**
 
-1. Use eksctl to provision an EKS cluster.
-
-
-   Use yaml- cluster.yaml or direct command
+1. EKS cluster Provisioning (using nodetype EC2 instances)
+ 
+   Can be done through AWS Console or eksctl command.
+   Here using eksctl command
+   The input can be given in yaml or in the commandline itself.
+  
+   Eg 1: Using yaml- cluster.yaml  
    
    ---
        eksctl create cluster -f cluster.yaml
        eksctl get nodegroup --cluster rkc-EKS-Democlusterfromec2
    OR
+   
+   Eg 2: Using comand directly with sufficient options : 
+   
+   ---
+          eksctl create cluster --name rkc-EKS-Democlusterfromec2 --region us-east-1
    
    Check cluster
    
@@ -62,7 +70,7 @@ Basic Cluster setup instcructions:
        aws eks update-kubeconfig --name rkc-EKS-Democlusterfromec2 --region us-east-1
 
  
-****Create a Service and Deployment on Your EKS Cluster**
+**Create a Service and Deployment on Your EKS Cluster**
 
 
 1. Create a LoadBalancerservice.
@@ -89,7 +97,7 @@ Basic Cluster setup instcructions:
 6. Then check using the DNS name of the LoadBalancer.
 
 
-****Test the High Availability ****
+**Test the High Availability **
 
 1. In the AWS Console, shut/terminate any worker.
 2. Check the status using kubectl.
