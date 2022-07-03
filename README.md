@@ -43,7 +43,7 @@ Basic Cluster setup instcructions:
 1. EKS cluster Provisioning (using nodetype EC2 instances)
  
    Can be done through AWS Console or eksctl command.
-   Here using eksctl command
+   Here using eksctl command. 
    The input can be given in yaml or in the commandline itself.
   
    Eg 1: Using yaml- cluster.yaml  
