@@ -57,6 +57,7 @@ Basic Cluster setup instructions:
    
    ---
        eksctl create cluster -f cluster.yaml
+       aws eks update-kubeconfig --region us-east-1 --name rkc-EKS-Democlusterfromec2
        eksctl get nodegroup --cluster rkc-EKS-Democlusterfromec2
    OR
    
