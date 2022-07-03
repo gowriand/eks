@@ -53,7 +53,7 @@ Basic Cluster setup instructions:
    Here using eksctl command. 
    The input can be given in yaml or in the commandline itself.
   
-   Eg 1: Using yaml- cluster.yaml  
+   Eg 1: Using yaml- cluster.yaml  (Update the subnet values accordingly)
    
    ---
        eksctl create cluster -f cluster.yaml
