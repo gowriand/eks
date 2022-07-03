@@ -1,5 +1,5 @@
 ----------------------
-Basic Cluster setup instcructions:
+Basic Cluster setup instructions:
 ----------------------
 
 **Create an IAM User**
