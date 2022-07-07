@@ -1,0 +1,18 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+metadata:
+  name: rkc-EKS-Democluster1
+  region: us-east-1
+managedNodeGroups:
+- name: ng1-1
+  minSize: 1
+  maxSize: 2
+  desiredCapacity: 2
+  volumeSize: 20
+  privateNetworking: true
+  ssh:
+    allow: true
+    publicKeyPath: ~/.ssh/ec2_id_rsa.pub
+  labels: {role: worker}
+  tags:
+    nodegroup-role: worker

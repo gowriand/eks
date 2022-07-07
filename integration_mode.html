@@ -1,0 +1,539 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+      <title>Pick an integration mode - deployment walkthrough with Ruby, Passenger and Linux/Unix - Passenger Library</title>
+      <meta name="st:title" content="Pick an integration mode - deployment walkthrough with Ruby, Passenger and Linux&#x2F;Unix">
+    <link rel="stylesheet" href="../../../../stylesheets/all-4c062bc1.css" type="text/css">
+      <meta class="swiftype" name="integration_mode" data-type="enum" content="none">
+      <meta class="swiftype" name="language" data-type="enum" content="ruby">
+      <meta class="swiftype" name="edition" data-type="enum" content="none">
+      <script>
+        window.googleAnalyticsEnabled = true;
+      </script>
+      <!-- Global site tag (gtag.js) - Google Analytics -->
+      <script async src="https://www.googletagmanager.com/gtag/js?id=UA-32583440-10"></script>
+      <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'UA-32583440-10', { 'anonymize_ip': true });
+      </script>
+    <script type="text/javascript">
+
+  // This script part executes a quick redirect if all choices are known. If choices are partially known, then the known
+  // ones will be hidden through additional scripting further on.
+  function getUrlVar(key) {
+    var result = new RegExp(key + "=([^&]*)", "i").exec(window.location.search);
+    return result && unescape(result[1]) || "";
+  }
+
+  function getDestWithAnchor(dest) {
+    anchorParm = getUrlVar("a"); // destination anchors can be passed through the "a" URL param
+    if (anchorParm) {
+      dest += "#" + anchorParm;
+    }
+    return dest;
+  }
+
+  function getParamValue(params, paramKey) {
+    if (params) {
+      for (var i=0; i<params.length; i++) {
+        var tmp = params[i].split("=");
+        if (tmp[0] === paramKey) {
+          return tmp[1];
+        }
+      };
+    } else {
+      return null;
+    }
+  }
+
+  function overrideParamStoreIfValid(urlParams, storeKey, validChoices) {
+    var paramValue = getParamValue(urlParams, storeKey);
+    for (var i=0; i<validChoices.length; i++) {
+      if (paramValue === validChoices[i]) {
+        if (window.localStorage) {
+          try {
+            window.localStorage.setItem(storeKey, paramValue);
+          } catch (err) {
+            // Safari in Private Browsing mode throws exceptions
+            // on localStorage.setItem(). Ignore and log these
+            // exceptions.
+            if (window.console) {
+              console.error(err);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  destFromLocals = getDestWithAnchor(":intmode:/open_source_vs_enterprise.html");
+
+  var knownChoices = {};
+
+  // Allow choice override through URL params (validation needed to prevent arbitrary redirects).
+  var urlParams = location.search.substr(1).split("&");
+
+  var library_integration_mode_valid_choices = [ 
+    "nginx","apache","standalone"
+    ];
+
+  overrideParamStoreIfValid(urlParams, "library_integration_mode", library_integration_mode_valid_choices);
+
+  if (true && window.localStorage && !true) {
+    intModeSel = destFromLocals.indexOf(":intmode:") >= 0;
+    intModeStore = window.localStorage.getItem('library_integration_mode');
+    if (intModeStore) {
+      if (true || [].indexOf(langStore) >= 0) {
+        intModeSel = false;
+        destFromLocals = destFromLocals.replace(":intmode:", intModeStore);
+        knownChoices["intmode"] = intModeStore;
+      }
+    }
+
+    langSel = destFromLocals.indexOf(":lang:") >= 0;
+    langStore = window.localStorage.getItem('programming_language');
+    if (langStore) {
+      if (true || [].indexOf(langStore) >= 0) {
+        langSel = false;
+        destFromLocals = destFromLocals.replace(":lang:", langStore);
+        knownChoices["lang"] = langStore;
+      }
+    }
+
+    editionSel = destFromLocals.indexOf(":edition:") >= 0;
+    editionStore = window.localStorage.getItem('product_edition');
+    if (editionStore) {
+      if (true || [].indexOf(langStore) >= 0) {
+        editionSel = false;
+        destFromLocals = destFromLocals.replace(":edition:", editionStore);
+        knownChoices["edition"] = editionStore;
+      }
+    }
+
+    if (!intModeSel && !langSel && !editionSel) {
+      window.location.replace(destFromLocals);
+    }
+  }
+</script>
+
+  </head>
+
+  <body class="walkthroughs walkthroughs_deploy walkthroughs_deploy_ruby walkthroughs_deploy_ruby_ownserver walkthroughs_deploy_ruby_ownserver_integration_mode">
+    <!-- Main navigation
+    =========================================== -->
+    <header class="navbar navbar-static-top bs-docs-nav" id="top" data-swiftype-index="false">
+      <div class="container">
+        <div class="navbar-header" role="banner">
+          <button class="navbar-toggle" type="button" data-toggle="collapse" data-target=".bs-navbar-collapse">
+            <span class="glyphicon glyphicon-menu-hamburger" aria-hidden="true"></span> Navigation
+          </button>
+          <a class="navbar-brand" href="../../../../">
+            <span class="navbar-brand-part1">Passenger</span>
+            <span class="navbar-brand-part2">Library</span>
+          </a>
+        </div>
+        <nav class="collapse navbar-collapse bs-navbar-collapse" role="navigation">
+          <ul class="nav navbar-nav">
+<li class="active dropdown">              <a href="../../../" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Tutorials <span class="caret"></span></a>
+              <ul class="dropdown-menu" role="menu">
+                <li><a href="../../../start/">Quickstart</a></li>
+                <li><a href="../../../basics/">Basics</a></li>
+                <li class="active"><a href="../../">Deploy to production</a></li>
+              </ul>
+</li><li class="dropdown">              <a href="../../../../guides.html" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Topics <span class="caret"></span></a>
+                <ul class="dropdown-menu" role="menu">
+                  <li><a href="../../../../install/">Installation, upgrade and uninstallation</a></li>
+                  <li><a href="../../../../dev/">Developing with Passenger</a></li>
+                  <li><a href="../../../../config/">Configuration and optimization</a></li>
+                  <li><a href="../../../../deploy/">Deployment and scaling</a></li>
+                  <li><a href="../../../../admin/">Administration, debugging and troubleshooting</a></li>
+                  <li><a href="../../../../indepth/">In-depth</a></li>
+                </ul>
+<li class="dropdown">                  <a href="../../../../config/" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">References <span class="caret"></span></a>
+                  <ul class="dropdown-menu" role="menu">
+                    <li><a href="../../../../config/reference/">Configuration reference</a></li>
+                    <li><a href="../../../../indepth/hooks.html">Hooks</a></li>
+                  </ul>
+</li></li>          </ul>
+          <ul class="nav navbar-nav navbar-right">
+            <li class="swiftype-container">
+              <form action="javascript:void(0)">
+                <input type="text" id="st-search-input" class="st-default-search-input form-control" autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="Enter a search term...">
+              </form>
+            </li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">About <span class="caret"></span></a>
+              <ul class="dropdown-menu" role="menu">
+                <li><a href="https://www.phusionpassenger.com/">Back to Passenger homepage</a></li>
+                <li><a href="https://www.phusionpassenger.com/documentation_and_support" target="_blank">Support</a></li>
+                <li><a href="http://www.phusion.nl/contact" target="_blank">Contact</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <div class="container">
+  <div class="row">
+    <div class="col-md-8 col-md-offset-2">
+      <div class="info">
+        <p>We've redesigned, updated, rerouted and regrouped the library for better discoverability and a better flow. You can visit the <a href="https://www.phusionpassenger.com/docs/tutorials/what_is_passenger/">new documentation here</a>.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    <div class="container bs-docs-container">
+      <div class="row">
+          <!-- Sidebar
+          =========================================== -->
+          <div class="col-md-3" role="complementary">
+            <aside class="bs-docs-sidebar hidden-print" data-swiftype-index="false">
+              
+<div class="breadcrumb-container breadcrumb-container-main" data-swiftype-index="false">
+  <p class="breadcrumb-announcer">Current section:</p>
+
+  <h2>
+    <a href="../../">
+      <span class="glyphicon glyphicon-picture"></span>
+      Deployment tutorial<br>
+      <small>for Ruby developers</small>
+    </a>
+  </h2>
+
+  <p class="back-to-previous">
+    <a href="../../../../#walkthroughs">&laquo; Back to all tutorials</a>
+  </p>
+</div>
+
+<ul class="nav nav-stacked">
+<li>    <a href="../">
+        1 Select infrastructure
+          <br><small>Chosen: Linux/Unix</small>
+    </a>
+</li>
+<li class="active">        <a href="integration_mode.html">
+          2 Pick integration mode
+        </a>
+</li>
+    <li>
+      <a href="nginx/open_source_vs_enterprise.html" class="muted">3 Open source vs Enterprise</a>
+    </li>
+
+
+      <li><a href="nginx/oss/install_language_runtime.html" class="muted">4 Install Ruby</a></li>
+
+      <li><a href="nginx/oss/trusty/install_passenger.html" class="muted">5 Install Passenger</a></li>
+
+      <li><a href="nginx/oss/trusty/deploy_app.html" class="muted">6 Deploy app</a></li>
+
+    <li><a href="nginx/oss/deploy_updates.html" class="muted">7 Deploy updates</a></li>
+
+    <li><a href="nginx/oss/conclusion.html" class="muted">8 Conclusion</a></li>
+</ul>
+
+            </aside>
+          </div>
+
+          <!-- Content
+          =========================================== -->
+          <div class="col-md-8" role="main">
+
+              <div style="position: relative; z-index: 1">
+                <div class="editlink"><a href="https:&#x2F;&#x2F;github.com&#x2F;phusion&#x2F;passenger_library&#x2F;edit&#x2F;master&#x2F;source&#x2F;walkthroughs&#x2F;deploy&#x2F;integration_mode.html.erb">Edit page</a></div>
+              </div>
+
+            <section class="bs-docs-section">
+              
+<h1>Pick an integration mode</h1>
+<p>
+  Passenger in <em>standalone</em> mode is highly optimized for performance and great for development or detailed control in production environments. The <a href="../../../start/ruby.html">quickstart</a> and the <a href="../../../basics/ruby/">basics</a> walkthroughs use this mode.
+</p>
+<p>
+  If you plan on hosting multiple applications, or if you are already familiar with the <a href="http://nginx.org/">Nginx</a> or <a href="http://httpd.apache.org">Apache</a> webserver, it is easier to use one of those modes. This allows you configure and run Passenger through the familiar webserver config and control mechanisms.
+</p>
+<div class="note">If you need Websockets, be aware of <a href="https://github.com/phusion/passenger/issues/1202">issues with Apache</a>.</div>
+
+
+<div><!-- Put everything in a container div so that when included from a Markdown file, the Markdown parser won't try to render our content. -->
+
+<script>
+var choiceMap_0 = {};
+if (typeof knownChoices !== 'undefined') {
+  choiceMap_0 = knownChoices;
+}
+</script>
+
+
+<div id="choicerow_0_intmode" class="icon-selection-row-container icon-selection-row-container-tabs">
+  <div class="icon-selection-row-intro icon-selection-row-intro-small">
+    <p class="lead">Please select the relevant integration mode.</p>
+    <p>
+      <a href="../../../../indepth/integration_modes.html">What is this?</a>
+       &middot; <a href="../../../../indepth/integration_modes.html#differences">What are the differences?</a>
+       &middot; <a href="../../../../indepth/integration_modes.html#which-mode-should-you-use">Which one should I use?</a>
+    </p>
+  </div>
+
+  <div class="icon-selection-row-items" role="tablist">
+
+
+    <a href="#nginx_choices" aria-controls="nginx_choices" data-toggle="tab" class="icon-selection-row-item nginx"
+       onclick="applyChoice(choiceMap_0, 'library_integration_mode', 'intmode', 'nginx', 'continue_0', getDestWithAnchor(':intmode:/open_source_vs_enterprise.html'));">
+
+      <img src="../../../../images/nginx-37d95ef9.png" width="96" height="96" alt="Nginx">
+      <span class="icon-selection-row-item-label">Nginx</span>
+    </a>
+
+    <a href="#apache_choices" aria-controls="apache_choices" data-toggle="tab" class="icon-selection-row-item apache"
+       onclick="applyChoice(choiceMap_0, 'library_integration_mode', 'intmode', 'apache', 'continue_0', getDestWithAnchor(':intmode:/open_source_vs_enterprise.html'));">
+
+      <img src="../../../../images/apache-9c5eddc8.png" width="96" height="96" alt="Apache">
+      <span class="icon-selection-row-item-label">Apache</span>
+    </a>
+
+    <a href="#standalone_choices" aria-controls="standalone_choices" data-toggle="tab" class="icon-selection-row-item standalone"
+       onclick="applyChoice(choiceMap_0, 'library_integration_mode', 'intmode', 'standalone', 'continue_0', getDestWithAnchor(':intmode:/open_source_vs_enterprise.html'));">
+
+      <img src="../../../../images/passenger-beed3e69.png" width="80" height="96" alt="Standalone">
+      <span class="icon-selection-row-item-label">Standalone</span>
+    </a>
+
+  </div>
+</div>
+
+
+
+<div style="width: 100%; text-align: center; margin-left: auto; margin-right:auto">
+  <p><a id="continue_0" href="" class="btn btn-primary btn-lg disabled">Continue &raquo;</a></p>
+</div>
+    <p><a href="nginx/open_source_vs_enterprise.html" style="display:none" class="btn btn-primary btn-lg">Continue &raquo;</a></p>
+    <p><a href="apache/open_source_vs_enterprise.html" style="display:none" class="btn btn-primary btn-lg">Continue &raquo;</a></p>
+    <p><a href="standalone/open_source_vs_enterprise.html" style="display:none" class="btn btn-primary btn-lg">Continue &raquo;</a></p>
+
+</div><!-- End container div for Markdown safety -->
+
+
+
+            </section>
+          </div>
+      </div>
+    </div>
+
+
+    <!-- Footer
+    =========================================== -->
+    <footer class="bs-docs-footer" role="contentinfo" data-swiftype-index="false">
+      <div class="container">
+        <div class="bs-docs-social">
+          <ul class="bs-docs-social-buttons">
+            <li>
+              <iframe class="github-btn" src="https://ghbtns.com/github-btn.html?user=phusion&amp;repo=passenger&amp;type=watch&amp;count=true" width="90" height="20" title="Star on GitHub"></iframe>
+            </li>
+            <li>
+              <iframe class="github-btn" src="https://ghbtns.com/github-btn.html?user=phusion&amp;repo=passenger&amp;type=fork&amp;count=true" width="90" height="20" title="Fork on GitHub"></iframe>
+            </li>
+            <li>
+              <a href="https://twitter.com/share" class="twitter-share-button" data-url="https://www.phusionpassenger.com" data-count="horizontal" data-via="phusion_nl" data-text="Phusion Passenger">Tweet</a>
+            </li>
+            <li>
+              <a href="https://twitter.com/phusion_nl" class="twitter-follow-button" data-show-count="true">Follow @phusion_nl</a>
+            </li>
+          </ul>
+        </div>
+
+        <p>
+          Documentation licensed under <a href="http://creativecommons.org/licenses/by-sa/4.0/">CC BY SA 4.0</a>.
+        </p>
+        <p class="legal-notice-small">
+          Copyright &copy; 2008-2022 Phusion Holding B.V. and contributors to the Passenger Library.
+        </p>
+        <p class="legal-notice-small">
+          "Phusion", "Phusion Passenger", "Passenger" and the Phusion pinwheel logo are registered trademarks of Phusion Holding B.V.
+        </p>
+
+        <!-- Based on http://mistic100.github.io/jekyll-bootstrap-doc/ -->
+        <ul class="bs-docs-footer-links muted">
+          <li><a href="https://github.com/phusion/passenger">Passenger at Github</a></li>
+          <li>&middot;</li>
+          <li><a href="https://github.com/phusion/passenger_library">Passenger Library at Github</a></li>
+        </ul>
+      </div>
+    </footer>
+
+    
+
+      <script src="../../../../javascripts/all-2d7fb12a.js" async="true"></script>
+
+      <script>
+        adroll_adv_id = "EGR6J3X3IZEVHJN3CGDVPS";
+        adroll_pix_id = "MZKAAVA3MVBWHKNHPWDOKS";
+        // adroll_email = "username@example.com"; // OPTIONAL: provide email to improve user identification
+        (function () {
+            var _onload = function(){
+                if (document.readyState && !/loaded|complete/.test(document.readyState)){setTimeout(_onload, 10);return}
+                if (!window.__adroll_loaded){__adroll_loaded=true;setTimeout(_onload, 50);return}
+                var scr = document.createElement("script");
+                var host = (("https:" == document.location.protocol) ? "https://s.adroll.com" : "http://a.adroll.com");
+                scr.setAttribute('async', 'true');
+                scr.type = "text/javascript";
+                scr.src = host + "/j/roundtrip.js";
+                ((document.getElementsByTagName('head') || [null])[0] ||
+                    document.getElementsByTagName('script')[0].parentNode).appendChild(scr);
+            };
+            if (window.addEventListener) {window.addEventListener('load', _onload, false);}
+            else {window.attachEvent('onload', _onload)}
+        }());
+      </script>
+
+    <div class="st-injected-content-generated st-install-hAw7oyzHaFA3x2KtoDpk" data-st-install-key="hAw7oyzHaFA3x2KtoDpk" id="st-injected-content" data-swiftype-index="false" style="display: none">
+  <div class="st-ui-embed st-search-chrome-overlay-output st-search-escape-hide-outputs st-search-zoom-on-mobile" style="display: block;">
+
+    <div class="st-ui-overlay st-search-hide-outputs"></div>
+      <!-- Swiftype input and results overlay -->
+      <div class="st-ui-container st-ui-container-overlay  st-ui-injected-overlay-container ">
+        <!-- HEADER -->
+        <div class="st-ui-container-header_bar st-position-container">
+          <section class="st-ui-header">
+            <form action="javascript:void(0)">
+              <input class="st-default-search-input st-search-set-focus" type="text" value="" placeholder="Search this site" id="st-overlay-search-input" autocomplete="off" autocorrect="off" autocapitalize="off">
+
+              <div class="st-filters">
+                <span class="st-filters-label">
+                  Filters:
+                </span>
+
+                <select class="st-search-integration-mode">
+                  <option value="all">All integration modes</option>
+                    <option value="nginx">Nginx</option>
+                    <option value="apache">Apache</option>
+                    <option value="standalone">Standalone</option>
+                </select>
+                <select class="st-search-language">
+                  <option value="all">All languages</option>
+                    <option value="ruby">Ruby</option>
+                    <option value="python">Python</option>
+                    <option value="nodejs">Node.js</option>
+                    <option value="meteor">Meteor</option>
+                </select>
+                <select class="st-search-edition">
+                  <option value="all">All editions</option>
+                    <option value="oss">Passenger open source</option>
+                    <option value="enterprise">Passenger Enterprise</option>
+                </select>
+              </div>
+            </form>
+            <span class="st-ui-search-icon"></span>
+            <a class="st-ui-close-button st-search-hide-outputs">Close</a>
+
+            <a class="st-ui-stamp" href="https://swiftype.com" target="_blank">search by swiftype</a>
+          </section>
+        </div>
+
+        <!-- LEFT SIDEBAR -->
+        <div class="st-ui-container-left_sidebar st-position-container">
+          <div class="st-ui-injected-search-controls">
+          </div>
+        </div>
+
+        <!-- RIGHT SIDEBAR -->
+        <div class="st-ui-container-right_sidebar st-position-container">
+          <div class="st-ui-injected-container-right_sidebar">
+            <div class="st-ui-injected-search-controls">
+            </div>
+          </div>
+        </div>
+
+        <!-- PRIMARY CONTENT -->
+        <div class="st-ui-container-primary_content st-position-container">
+          <section class="st-ui-slide-autocomplete st-autocomplete-keyboard-navigable st-autocomplete-transient-on-select-and-results" data-st-target-element="#st-overlay-search-input" data-st-active-query-class="active" style="display: none;">
+            <span class="st-ui-type-heading-small">suggested results</span>
+            <div class="st-autocomplete-results"><div class="st-query-present" style="display: block;"></div></div>
+          </section>
+
+          <section class="st-ui-content st-search-results">
+            <div class="st-query-not-present" style="display: none;">
+              <span class="st-ui-fallback"></span>
+            </div>
+            <div class="st-query-present" style="display: block;">
+              <a href="https://www.phusionpassenger.com/library/walkthroughs/start/ruby.html" class="st-ui-result __swiftype_result" data-st-result-doc-id="558b1dff075523771d00172a">
+                <span class="st-ui-type-heading"><em>Quickstart</em>: Ruby + Phusion Passenger</span>
+                <span class="st-ui-type-detail">
+                  <span class="st-ui-type-detail-bold">
+                    <em>Quickstart</em>: Ruby + Phusion Passenger
+                  </span>
+                  &nbsp;•&nbsp;
+                  <em>Quickstart</em>: Ruby + Phusion Passenger This 5 minute tutorial teaches you to start your application in a Phusion Passenger server, in development mode. Feel what Passenger is and how it works. Are you looking to deploy your app to production with Passenger, maybe in combination with Nginx or Apache? Take
+                </span>
+              </a>
+              <a href="https://www.phusionpassenger.com/library/walkthroughs/start/meteor.html" class="st-ui-result __swiftype_result" data-st-result-doc-id="558b1e000711e87aed0004b4">
+                <span class="st-ui-type-heading"><em>Quickstart</em>: Meteor + Phusion Passenger</span>
+                <span class="st-ui-type-detail">
+                  <span class="st-ui-type-detail-bold">
+                    <em>Quickstart</em>: Meteor + Phusion Passenger
+                  </span>
+                  &nbsp;•&nbsp;
+
+                  <em>Quickstart</em>: Meteor + Phusion Passenger This 5 minute tutorial teaches you to start your application in a Phusion Passenger server, in development mode. Feel what Passenger is and how it works. Are you looking to deploy your app to production with Passenger, maybe in combination with Nginx or Apache?
+                </span>
+              </a>
+              <a href="https://www.phusionpassenger.com/library/walkthroughs/start/nodejs.html" class="st-ui-result __swiftype_result" data-st-result-doc-id="558b1dff0cc37f4ba5001600">
+                <span class="st-ui-type-heading"><em>Quickstart</em>: Node.js + Phusion Passenger</span>
+                <span class="st-ui-type-detail">
+                  <span class="st-ui-type-detail-bold">
+                    <em>Quickstart</em>: Node.js + Phusion Passenger
+                  </span>
+                  &nbsp;•&nbsp;
+
+                  <em>Quickstart</em>: Node.js + Phusion Passenger This 5 minute tutorial teaches you to start your application in a Phusion Passenger server, in development mode. Feel what Passenger is and how it works. Are you looking to deploy your app to production with Passenger, maybe in combination with Nginx or Apache
+                </span>
+              </a>
+            </div>
+          </section>
+
+          <section class="st-ui-no-results st-search-suggestions">
+            <div class="st-query-not-present" style="display: none;">
+            </div>
+            <div class="st-query-present">
+            </div>
+          </section>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="st-ui-container-footer_bar st-position-container">
+          <section class="st-ui-footer">
+            <span class="st-ui-search-summary st-search-summary">
+              <div class="st-query-present">
+                Showing <strong>1</strong>–<strong>10</strong> of <strong>115</strong>
+                <span class="st-ui-search-summary-query">for “quickstart”</span>
+              </div>
+            </span>
+            <span class="st-ui-pagination st-search-pagination">
+              <div class="st-query-present">
+                <a class="st-ui-pagination-link st-ui-pagination-number-link st-result-pagination-link active" data-st-page="1" href="#">1</a>
+                <a class="st-ui-pagination-link st-ui-pagination-number-link st-result-pagination-link" data-st-page="2" href="#">2</a>
+                <a class="st-ui-pagination-link st-result-pagination-link" data-st-page="2" href="#">next <span class="st-ui-arrow right-arrow"></span></a>
+              </div>
+            </span>
+          </section>
+        </div>
+      </div>
+    </div> <!-- st-ui-overlay -->
+
+    <div class="st-default-autocomplete" data-st-target-element=".st-default-search-input" style="display: none; position: absolute; top: 115px; left: 352px; z-index: 999999; width: 638px;">
+    <div class="st-autocomplete-results st-ui-autocomplete"><div class="st-query-present" style="display: block;"></div></div>
+
+  </div> <!-- st-ui-embed -->
+</div>
+
+  </body>
+</html>
