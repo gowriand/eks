@@ -10,7 +10,8 @@ Basic Cluster setup instructions:
 **Create VPC**
 1. Can do it through cloud formation after logging as this IAM user.
 2. Use the CF template :  https://s3.us-west-2.amazonaws.com/amazon-eks/cloudformation/2020-10-29/amazon-eks-vpc-private-subnets.yaml
- 
+---
+       aws cloudformation create-stack  --region us-east-1  --stack-name rkc-vpc1 --template-url https://s3.us-west-2.amazonaws.com/amazon-eks/cloudformation/2020-10-29/amazon-eks-vpc-private-subnets.yaml
 ------------------------
 **Launch an EC2 Instance and other command line tools**
 1. Create an **EC2 instance** in the same region. eg: us-east-1
@@ -53,10 +54,11 @@ Basic Cluster setup instructions:
    Here using eksctl command. 
    The input can be given in yaml or in the commandline itself.
   
-   Eg 1: Using yaml- cluster.yaml  
+   Eg 1: Using yaml- cluster.yaml  (Update the subnet values accordingly)
    
    ---
        eksctl create cluster -f cluster.yaml
+       aws eks update-kubeconfig --region us-east-1 --name rkc-EKS-Democlusterfromec2
        eksctl get nodegroup --cluster rkc-EKS-Democlusterfromec2
    OR
    
