@@ -2,10 +2,11 @@ apiVersion: eksctl.io/v1alpha5
 kind: ClusterConfig
 
 metadata:
-  name: rkc-eks-argocd-new
+  name: rkc-eks-demo
   region: us-east-1
 
 vpc:
+  id: vpc-03658391eefc02dca
   subnets:
     private:
       rkc-vpc1-PrivateSubnet02: { id: subnet-0449cffda2ef34267 }
@@ -14,12 +15,6 @@ vpc:
       rkc-vpc1-PublicSubnet02: { id: subnet-018ad04e06ec73083 }
       rkc-vpc1-PublicSubnet01: { id: subnet-0aa7597ea560399d1 }
 
-nodeGroups:
-  - name: eks-ng-1
-    instanceType: t2.micro
-    desiredCapacity: 1
-    volumeSize: 10
-    ssh:
-      allow: true # will use ~/.ssh/id_rsa.pub as the default ssh key
-      publicKeyPath: /eks/keys/id_rsa.pub
+iam:
+  serviceRoleARN: arn:aws:iam::569177097303:role/rkc-EKS-cluster-Role
 
